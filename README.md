@@ -1,4 +1,4 @@
 Portals
 =======
 
-An attempt at non-euclidean in Minecraft
+An attempt at non-euclidean geometry in Minecraft
