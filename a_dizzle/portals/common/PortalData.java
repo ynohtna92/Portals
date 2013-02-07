@@ -13,6 +13,7 @@ public class PortalData extends WorldSavedData{
 	public ArrayList<TileEntityPortalBase> registeredPortals = new ArrayList<TileEntityPortalBase>();
 	public static final String PORTAL_LIST_FILENAME = "PortalsMod-PortalsEntityData";
 	public World world;
+	public ArrayList<TileEntityCloneData> storedList = new ArrayList<TileEntityCloneData>();
 	
 	public PortalData(String par1Str) {
 		super(par1Str);
@@ -27,31 +28,44 @@ public class PortalData extends WorldSavedData{
 	{
         PortalData pl = (PortalData)world.mapStorage.loadData(PortalData.class, PORTAL_LIST_FILENAME);
         if(pl != null)
+        {
+        		pl.world = world;
+        		loadPortalList(pl);
                 return pl;
+        }
  
         pl = new PortalData(PORTAL_LIST_FILENAME, world);
         world.mapStorage.setData(PORTAL_LIST_FILENAME, pl);
         return pl;
 	}
 	
-	public void loadPortal(int x, int y, int z)
+	public static void loadPortalList(PortalData pl)
+	{
+		for(int i = 0; i < pl.storedList.size() ; i++)
+		{
+			TileEntity te = pl.world.getBlockTileEntity(pl.storedList.get(i).x, pl.storedList.get(i).y, pl.storedList.get(i).z);
+			if(te instanceof TileEntityPortalBase)
+			{
+				if(!pl.registeredPortals.contains(te))
+					pl.registeredPortals.add((TileEntityPortalBase) te);
+			}
+		}
+	}
+	
+	public void storePortalCoords(int x, int y, int z)
 	{
 		System.out.println("x: "+ x + " y: "+ y +" z: " + z);
-		TileEntity te = world.getBlockTileEntity(x, y, z);
-		if(te instanceof TileEntityPortalBase)
-		{
-			if(!registeredPortals.contains(te))
-				registeredPortals.add((TileEntityPortalBase) te);
-		}
+		storedList.add(new TileEntityCloneData(x,y,z));
 	}
 
 	@Override
 	public void readFromNBT(NBTTagCompound nbttagc) {
+		System.out.println("hi");
 		NBTTagList var2 = nbttagc.getTagList("portals");
 		for(int i = 0; i < var2.tagCount(); i++)
 		{
 			NBTTagCompound var4 = (NBTTagCompound)var2.tagAt(i);
-			loadPortal(var4.getInteger("x"),var4.getInteger("y"),var4.getInteger("z"));
+			storePortalCoords(var4.getInteger("x"),var4.getInteger("y"),var4.getInteger("z"));
 		}
 	}
 
